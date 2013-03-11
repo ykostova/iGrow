@@ -42,23 +42,26 @@ public class SensorData extends HttpServlet {
 		int node = -10;
 		String sType = "";
 		int sNumber = -10;
-		try {
-			node = Integer.parseInt(pathComponents[3]);
+		
+		if (pathComponents.length > 3) {
+			try {
+				node = Integer.parseInt(pathComponents[3]);
 			
-			if (pathComponents.length > 4) {
-				sType = pathComponents[4];
-			}
+				if (pathComponents.length > 4) {
+					sType = pathComponents[4];
+				}
 			
-			if (pathComponents.length > 5) {
-				sNumber = Integer.parseInt(pathComponents[5]);
-			}
-		} catch (Exception ex) {
-			PrintWriter out = new PrintWriter(response.getOutputStream());
-			response.setContentType("text/html");
-			out.print("Could not parse url:" + ex);
-			out.close();
-			return;
-		} 
+				if (pathComponents.length > 5) {
+					sNumber = Integer.parseInt(pathComponents[5]);
+				}
+			} catch (Exception ex) {
+				PrintWriter out = new PrintWriter(response.getOutputStream());
+				response.setContentType("text/html");
+				out.print("Could not parse url:" + ex);
+				out.close();
+				return;
+			} 
+		}
 		
 		// build query
 		String query = "SELECT * FROM node ";
@@ -75,15 +78,14 @@ public class SensorData extends HttpServlet {
 			}
 			
 			if (sNumber != -10) {
-				query += " AND sensorNumber = ?;";
-			} else if (!sType.equals("water-level")) {
-				query += "WHERE node.id = ?;";
-			}
+				query += " AND sensorNumber = ? ORDER BY timestamp;";
+			} 
 		} else {
-			query += "WHERE node.id = ?;";
+			if (node != -10) {
+				query += " WHERE node.id = ?";
+			}
+			query += ";";
 		}
-		
-		System.out.println(query);
 		
 		// db select
     	try {
@@ -91,7 +93,9 @@ public class SensorData extends HttpServlet {
 			try
 	    	{	
 				PreparedStatement getSensorData = dbCon.prepareStatement(query);
-				getSensorData.setInt(1, node);
+				if (node != -10) {
+					getSensorData.setInt(1, node);
+				}
 				if (!sType.isEmpty() && sNumber != -10) {
 					getSensorData.setInt(2, sNumber);
 				}
@@ -103,7 +107,6 @@ public class SensorData extends HttpServlet {
 				int numberOfColumns = sensorDataMetaData.getColumnCount();
 				String[][] colNames = new String[numberOfColumns][2];
 				
-				Map colMap = new LinkedHashMap();
 				for (int i = 1; i < numberOfColumns + 1; i++) {
 					String name = sensorDataMetaData.getColumnName(i);
 					String type = sensorDataMetaData.getColumnTypeName(i);
@@ -112,22 +115,23 @@ public class SensorData extends HttpServlet {
 					colNames[i-1][1] = type;
 				}
 				
-				ArrayList<Map> rows = new ArrayList<Map>();
+				// Build JSONObjects from resultset
+				ArrayList<JSONObject> rows = new ArrayList<JSONObject>();
 				while (sensorData.next()) {					
-					for (int i = 1; i < numberOfColumns + 1; i++) {
-						Map row = new LinkedHashMap();
+					JSONObject row = new JSONObject();
+					for (int i = 1; i < numberOfColumns + 1; i++)  {	
 						String name = colNames[i-1][0];
 						String type = colNames[i-1][1];
 						
 						if (type.equals("INT")) {
-							row.put(name, sensorData.getInt(i));
+							row.put(name.toString(), sensorData.getInt(i));
 						} else if (type.equals("VARCHAR")) {
-							row.put(name, sensorData.getString(i));
+							row.put(name.toString(), sensorData.getString(i));
 						} else if (type.equals("TIMESTAMP")) {
-							row.put(name, sensorData.getTimestamp(i));
+							row.put(name.toString(), sensorData.getTimestamp(i));
 						}
-						rows.add(row);
 					}
+					rows.add(row);
 				}
 				
 	    		dbCon.close();
