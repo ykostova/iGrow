@@ -13,7 +13,7 @@ public class EmailAlerts {
 	private String mailServer; 
 	private String user;
 	private String pass;
-	private String message;
+	private String messageBody;
 	
 	public EmailAlerts(String to, String from, String mailServer, String user, String pass) {
 		this.to = to;
@@ -24,12 +24,12 @@ public class EmailAlerts {
 	}
 	
 	public void setMessage(String message) {
-		this.message = message;
+		this.messageBody = message;
 	}
 	
 	/**
 	 * 
-	 * Almost all of this is lightly modified from the example on stackexchange by "Mohit Bansal"
+	 * Almost all of this is lightly modified from the example on stackoverflow by "Mohit Bansal"
 	 * http://stackoverflow.com/questions/3649014/send-email-using-java
 	 */
 	public void send() {  
@@ -52,8 +52,7 @@ public class EmailAlerts {
          message.setFrom(new InternetAddress(from));
          message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
          message.setSubject("Your plants need attention!");
-         message.setText("It seems to be working!!");
-         System.out.println("Sent message successfully....");
+         message.setText(messageBody);
          SMTPTransport t = (SMTPTransport)session.getTransport("smtps");
          t.connect(mailServer, user, pass);
          t.sendMessage(message, message.getAllRecipients());      

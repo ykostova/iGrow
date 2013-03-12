@@ -36,7 +36,7 @@ public class SensorData extends HttpServlet {
 	 * Parse & output URL of /node/sensor/id
 	 */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// parse url
+    	// parse url
 		String requestPath = request.getRequestURI();
 		String[] pathComponents = requestPath.split("/");
 		
@@ -85,7 +85,7 @@ public class SensorData extends HttpServlet {
 			response.setContentType("text/html");
 			out.print(jsonOut);
 			out.close();
-		}
+		} 
     }
     
 	/*
@@ -95,7 +95,6 @@ public class SensorData extends HttpServlet {
 		// parse url
 		String requestPath = request.getRequestURI();
 		String[] pathComponents = requestPath.split("/");
-		
 		int node = 0;
 		String sType = "";
 		int sNumber = 0;
@@ -112,6 +111,16 @@ public class SensorData extends HttpServlet {
 			out.close();
 			return;
 		} 
+		
+		// handle alerts
+		try {
+			ArrayList<Alert> alerts = Alert.getAlertsOfTypeForNode(response, DriverManager.getConnection("jdbc:mysql://localhost/garduino","root", ""), sType, node);
+			for (Alert a : alerts) {
+				a.doAlert(value);
+			}
+		} catch (SQLException e) {
+			System.out.println("Failed to email alerts due to sql error: " + e);
+		}
 		
 		// db insert
 		SensorDataDbHandler sensorDb;
