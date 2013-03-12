@@ -84,7 +84,7 @@ public class SensorDataDbHandler {
 					} else if (type.equals("VARCHAR")) {
 						row.put(name.toString(), sensorData.getString(i));
 					} else if (type.equals("TIMESTAMP")) {
-						row.put(name.toString(), sensorData.getTimestamp(i));
+						row.put(name.toString(), sensorData.getTimestamp(i).toString());
 					}
 				}
 				rows.add(row);
