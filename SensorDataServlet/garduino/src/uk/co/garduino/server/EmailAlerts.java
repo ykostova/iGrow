@@ -6,12 +6,8 @@ import javax.mail.internet.*;
 
 import com.sun.mail.smtp.SMTPTransport;
 
-/**
- * 
- * Almost all of this is lightly modified from the example on stackexchange by "Mohit Bansal"
- * http://stackoverflow.com/questions/3649014/send-email-using-java
- */
-public class EmailAlert {
+
+public class EmailAlerts {
 	private String to;
 	private String from;
 	private String mailServer; 
@@ -19,7 +15,7 @@ public class EmailAlert {
 	private String pass;
 	private String message;
 	
-	public EmailAlert(String to, String from, String mailServer, String user, String pass) {
+	public EmailAlerts(String to, String from, String mailServer, String user, String pass) {
 		this.to = to;
 		this.from = from;
 		this.mailServer = mailServer;
@@ -31,6 +27,11 @@ public class EmailAlert {
 		this.message = message;
 	}
 	
+	/**
+	 * 
+	 * Almost all of this is lightly modified from the example on stackexchange by "Mohit Bansal"
+	 * http://stackoverflow.com/questions/3649014/send-email-using-java
+	 */
 	public void send() {  
       Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
       final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
