@@ -82,7 +82,7 @@ public class SensorData extends HttpServlet {
 		if (results != null) {
 			String jsonOut = JSONValue.toJSONString(results);
 			PrintWriter out = new PrintWriter(response.getOutputStream());
-			response.setContentType("text/html");
+			response.setContentType("application/json");
 			out.print(jsonOut);
 			out.close();
 		} 
