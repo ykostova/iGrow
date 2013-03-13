@@ -1,4 +1,4 @@
-package uk.co.garduino.server;
+package uk.co.garduino.server.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,8 +32,8 @@ public class SensorDataDbHandler {
 				query += "JOIN humidity ON node.id = humidity.node_id WHERE node.id = ?";
 			} else if (sType.equals("light")) {
 				query += "JOIN light ON node.id = light.node_id WHERE node.id = ?";
-			} else if (sType.equals("water-level")) {
-				query += "JOIN water_level ON node.id = water_level.node_id WHERE node.id = ?";
+			} else if (sType.equals("soil-moisture")) {
+				query += "JOIN soil_moisture ON node.id = soil_moisture.node_id WHERE node.id = ?";
 				sNumber = -10;
 			}
 			
@@ -112,8 +112,8 @@ public class SensorDataDbHandler {
 					query = "INSERT INTO humidity (node_id, sensorNumber, value) VALUES (?,?,?);";
 				} else if (sType.equals("light")) {
 					query = "INSERT INTO light (node_id, sensorNumber, value) VALUES (?,?,?);";
-				} else if (sType.equals("water-level")) {
-					query = "INSERT INTO water_level (node_id, sensorNumber, value) VALUES (?,?,?);";
+				} else if (sType.equals("soil-moisture")) {
+					query = "INSERT INTO soil_moisture (node_id, sensorNumber, value) VALUES (?,?,?);";
 				}
 				PreparedStatement insertReading = dbCon.prepareStatement(query);
 				insertReading.setInt(1, node);

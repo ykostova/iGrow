@@ -1,4 +1,4 @@
-package uk.co.garduino.server;
+package uk.co.garduino.server.model;
 import java.security.Security;
 import java.util.*;
 import javax.mail.*;

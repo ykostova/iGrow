@@ -1,4 +1,4 @@
-package uk.co.garduino.server;
+package uk.co.garduino.server.controller;
 
 import java.io.IOException;
 import org.json.simple.*;
@@ -18,7 +18,10 @@ import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import uk.co.garduino.server.SensorDataDbHandler;
+
+import uk.co.garduino.server.model.Alert;
+import uk.co.garduino.server.model.SensorDataDbHandler;
+import uk.co.garduino.server.model.ApplicationSettings;
 
 /**
  * Servlet implementation class SensorData
@@ -67,7 +70,9 @@ public class SensorData extends HttpServlet {
 		// get the data 
 		SensorDataDbHandler sensorDb;
 		try {
-			sensorDb = new SensorDataDbHandler(DriverManager.getConnection("jdbc:mysql://localhost/garduino","root", ""));
+			sensorDb = new SensorDataDbHandler(DriverManager.getConnection( ApplicationSettings.dbString, 
+																			ApplicationSettings.dbUser, 
+																			ApplicationSettings.dbPass));
 		} catch (SQLException sqex) {
 			PrintWriter out = new PrintWriter(response.getOutputStream());
 			response.setContentType("text/html");
@@ -114,7 +119,9 @@ public class SensorData extends HttpServlet {
 		
 		// handle alerts
 		try {
-			ArrayList<Alert> alerts = Alert.getAlertsOfTypeForNode(response, DriverManager.getConnection("jdbc:mysql://localhost/garduino","root", ""), sType, node);
+			ArrayList<Alert> alerts = Alert.getAlertsOfTypeForNode(response, DriverManager.getConnection(   ApplicationSettings.dbString, 
+																											ApplicationSettings.dbUser, 
+																											ApplicationSettings.dbPass), sType, node);
 			for (Alert a : alerts) {
 				a.doAlert(value);
 			}
@@ -125,7 +132,9 @@ public class SensorData extends HttpServlet {
 		// db insert
 		SensorDataDbHandler sensorDb;
 		try {
-			sensorDb = new SensorDataDbHandler(DriverManager.getConnection("jdbc:mysql://localhost/garduino","root", ""));
+			sensorDb = new SensorDataDbHandler(DriverManager.getConnection( ApplicationSettings.dbString, 
+																			ApplicationSettings.dbUser, 
+																			ApplicationSettings.dbPass));
 			sensorDb.sensorInsert(response, node, sType, sNumber, value);
 		} catch (SQLException sqex) {
 			PrintWriter out = new PrintWriter(response.getOutputStream());
