@@ -104,11 +104,13 @@ public class SensorData extends HttpServlet {
 		String sType = "";
 		int sNumber = 0;
 		int value = 0;
+		String key = "";
 		try {
 			node = Integer.parseInt(pathComponents[3]);
 			sType = pathComponents[4];
 			sNumber = Integer.parseInt(pathComponents[5]);
 			value = Integer.parseInt(request.getParameter("value"));
+			key = pathComponents[6];
 		} catch (Exception ex) {
 			PrintWriter out = new PrintWriter(response.getOutputStream());
 			response.setContentType("text/html");
@@ -117,6 +119,14 @@ public class SensorData extends HttpServlet {
 			return;
 		} 
 		
+		if (!key.equals(ApplicationSettings.key)) {
+			PrintWriter out = new PrintWriter(response.getOutputStream());
+			response.setContentType("text/html");
+			out.print("Bad key");
+			out.close();
+			return;
+		}
+
 		// handle alerts
 		try {
 			ArrayList<Alert> alerts = Alert.getAlertsOfTypeForNode(response, DriverManager.getConnection(   ApplicationSettings.dbString, 
