@@ -4,8 +4,9 @@
 #include "floatToString.h"
 #include "Temperature.h"
 #include "Humidity.h"
+#include "Light.h"
 
-#define DHTPIN 2     // what pin we're connected to
+#define DHTPIN 8     // what pin we're connected to
 #define DHTTYPE DHT11   // DHT 11 
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -15,10 +16,14 @@ byte ip[] = {192,168,2,17}; // ip address for ethernet shield
 String serverAddress = "192.168.2.2"; // ip address to ping
 byte server[] = {192,168,2,2};
 int port = 8080;
+String ServletKey = "vhMPGBUHX7MLVMSG";
 
 EthernetClient client;
 Temperature temp = Temperature();
-Humidity humid = Humidity();String Project="garduino";
+Humidity humid = Humidity();
+Light light = Light();
+
+String Project="garduino";
 String Servlet="SensorData";
 String NodeID ="1";
 int TimeDelayBeingUpdates(3500);
@@ -43,14 +48,47 @@ char* DHT11Sensors[]={"1", "2"};
 
 void loop(){
 
-  if (client.connect(server,port)) 
+ConnectToServlet("temp");
+ConnectToServlet("humidity");
+ConnectToServlet("light");
+
+}
+
+
+void ConnectToServlet(String SensorType)
+{
+    if (client.connect(server,port)) 
   {
         Serial.println("connecting...");
-        String thisData = temp.generateTemp();
-        sendData(thisData,NodeID,"temp","1");
+
+        String thisData = "";
         
-        thisData = humid.generateHumidity();
-        sendData(thisData,NodeID,"humidity","1");
+        if(SensorType=="temp")
+        {
+            thisData = temp.generateTemp();
+            sendData(thisData,NodeID,"temp","1");
+            serialDebugData(thisData,NodeID,"temp","1");
+        }
+        else if( SensorType== "humidity")
+        {
+            thisData = humid.generateHumidity();
+            sendData(thisData,NodeID,"humidity","1");
+             serialDebugData(thisData,NodeID,"humidity","1");
+        }
+        else if(SensorType=="light")
+        {
+          thisData = light.generateLight(0);
+          sendData(thisData,NodeID,"light","1");
+          serialDebugData(thisData,NodeID,"light","1");
+        }
+        else if (SensorType=="soilMoisture")
+        {
+          
+        }
+         
+        Serial.println("");
+        delay(3000);
+
   }
   delay(1000);
   
@@ -66,17 +104,18 @@ void loop(){
     Serial.println("Error Connecting");
   }
 }
+  
 
 void updateTemperatureSensors()
 {
-  DHT11Sensors
+  
 }
 
 void sendData(String thisData, String NodeID,String SensorType, String SensorID) {
 
   Serial.println("connected");
   // node / type / number / value
-  client.println("POST /"+Project+"/"+Servlet+"/"+NodeID+"/"+SensorType+"/"+SensorID+"/ HTTP/1.1");
+  client.println("POST /"+Project+"/"+Servlet+"/"+NodeID+"/"+SensorType+"/"+SensorID+"/"+ServletKey+" HTTP/1.1");
   client.println("Host: "+serverAddress);
   client.println("Content-Type: application/x-www-form-urlencoded");
   client.print("Content-Length: ");
@@ -89,7 +128,7 @@ void sendData(String thisData, String NodeID,String SensorType, String SensorID)
 void serialDebugData(String thisData, String NodeID,String SensorType, String SensorID) 
 {
     //Prints your post request out for debugging
-  Serial.println("POST /"+Project+"/"+Servlet+"/"+NodeID+"/"+SensorType+"/"+SensorID+"/ HTTP/1.1");
+  Serial.println("POST /"+Project+"/"+Servlet+"/"+NodeID+"/"+SensorType+"/"+SensorID+"/"+ServletKey+" HTTP/1.1");
   Serial.println("Host: "+serverAddress);
   Serial.println("Content-Type: application/x-www-form-urlencoded");
   Serial.print("Content-Length: ");
