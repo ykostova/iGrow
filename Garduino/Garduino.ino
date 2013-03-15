@@ -5,6 +5,7 @@
 #include "Temperature.h"
 #include "Humidity.h"
 #include "Light.h"
+#include "SoilMoisture.h"
 
 #define DHTPIN 8     // what pin we're connected to
 #define DHTTYPE DHT11   // DHT 11 
@@ -22,6 +23,7 @@ EthernetClient client;
 Temperature temp = Temperature();
 Humidity humid = Humidity();
 Light light = Light();
+SoilMoisture soilMoisture = SoilMoisture();
 
 String Project="garduino";
 String Servlet="SensorData";
@@ -37,26 +39,56 @@ Serial.println("Set Up...");
 dht.begin();
 Serial.println("Set Up Complete");
 delay(1000);     
+pinMode(9, OUTPUT);  
 }
 
-char* SensorType[]={"temp", "humidity", "light", "water_level", "soil_moisture"};
+char* SensorType[]={"temp", "humidity", "light", "water-level", "soil-moisture"};
 
-char* lightSensors[]={"1", "2", "3", "4"};
-char* soilMoistureSensors[]={"1", "2", "3", "4","5", "6", "7", "8","9", "10"};
+String lightSensors[]={"0", "1", "2", "3"};
+char* soilMoistureSensors[]={"4","5", "6", "7"};
+
 char* waterLevelSensors[]={"1", "2", "3", "4"};
 char* DHT11Sensors[]={"1", "2"};
 
 void loop(){
 
-ConnectToServlet("temp");
-ConnectToServlet("humidity");
-ConnectToServlet("light");
+  activateWaterPump();
+  
+//ConnectToServlet("temp","1");
+//ConnectToServlet("humidity","1");
 
+/*
+ConnectToServlet("light","0");
+ConnectToServlet("light","1");
+ConnectToServlet("light","2");
+ConnectToServlet("light","3");
+*/
+
+
+ConnectToServlet("soil-moisture","4");
+ConnectToServlet("soil-moisture","5");
+ConnectToServlet("soil-moisture","6");
+ConnectToServlet("soil-moisture","7");
+
+
+    // read the analog in value:
+    int sensorValue = analogRead(1);            
+    // map it to the range of the analog out:
+    int outputValue = map(sensorValue, 0, 1023, 0, 255);  
+
+    // print the results to the serial monitor:
+    Serial.print("sensor = " );                      
+    Serial.print(sensorValue);      
+    Serial.print("\t output = ");      
+    Serial.println(outputValue); 
+
+    delay(3500);
 }
 
 
-void ConnectToServlet(String SensorType)
+void ConnectToServlet(String SensorType,String SensorID)
 {
+ 
     if (client.connect(server,port)) 
   {
         Serial.println("connecting...");
@@ -66,35 +98,60 @@ void ConnectToServlet(String SensorType)
         if(SensorType=="temp")
         {
             thisData = temp.generateTemp();
-            sendData(thisData,NodeID,"temp","1");
-            serialDebugData(thisData,NodeID,"temp","1");
         }
         else if( SensorType== "humidity")
         {
             thisData = humid.generateHumidity();
-            sendData(thisData,NodeID,"humidity","1");
-             serialDebugData(thisData,NodeID,"humidity","1");
         }
         else if(SensorType=="light")
         {
-          thisData = light.generateLight(0);
-          sendData(thisData,NodeID,"light","1");
-          serialDebugData(thisData,NodeID,"light","1");
-        }
-        else if (SensorType=="soilMoisture")
-        {
+          int LightSensorID =0;
           
+          if(SensorID=="0")
+          {
+            LightSensorID =0;
+          } else  if(SensorID=="1")
+          {
+            LightSensorID =1;
+          } else  if(SensorID=="2")
+          {
+            LightSensorID =2;
+          } else  if(SensorID=="3")
+          {
+            LightSensorID =3;
+          } 
+
+          thisData = light.generateLight(LightSensorID);
         }
+        else if (SensorType=="soil-moisture")
+        {
+          int SoilSensorID =4;
+          
+          if(SensorID=="4")
+          {
+            SoilSensorID =4;
+          } else  if(SensorID=="5")
+          {
+            SoilSensorID =5;
+          } else  if(SensorID=="6")
+          {
+            SoilSensorID =6;
+          } else  if(SensorID=="7")
+          {
+            SoilSensorID =7;
+          } 
+          
+          thisData = soilMoisture.generateSoilMoisture(SoilSensorID);
+        }
+        
+        sendData(thisData,NodeID,SensorType,SensorID);
+       // serialDebugData(thisData,NodeID,SensorType,SensorID);
          
         Serial.println("");
-        delay(3000);
-
   }
-  delay(1000);
   
   if (client.connected()) 
   {
-    Serial.println();
     Serial.println("disconnecting.");
     client.stop();
     delay(TimeDelayBeingUpdates);
@@ -106,9 +163,14 @@ void ConnectToServlet(String SensorType)
 }
   
 
-void updateTemperatureSensors()
+void activateWaterPump()
 {
-  
+    Serial.println("Pumping Water");
+  digitalWrite(9, HIGH);   // set the LED on
+  delay(2500);                  // wait for a second
+  digitalWrite(9, LOW);    // set the LED off
+  delay(2500);                  // wait for a second
+    Serial.println("Stopped Pumping Water");
 }
 
 void sendData(String thisData, String NodeID,String SensorType, String SensorID) {
