@@ -12,8 +12,9 @@ float Light::readLightSensor(int lightID)
 {
    float lightSensorValue=0.00;
  
- Serial.println("Light id = ");
- Serial.println(lightID);
+ Serial.print("Light id = ");
+ Serial.print(lightID);
+ Serial.println("");
     r0 = bitRead(lightID,0);    // use this with arduino 0013 (and newer versions)    
     r1 = bitRead(lightID,1);    // use this with arduino 0013 (and newer versions)    
     r2 = bitRead(lightID,2);    // use this with arduino 0013 (and newer versions)    
@@ -25,8 +26,8 @@ float Light::readLightSensor(int lightID)
     //Either read or write the multiplexed pin here
 
     photocellReading = analogRead(photocellPin);
-    Serial.print("Analog reading = ");
-    Serial.println(photocellReading); // the raw analog reading
+    //Serial.print("Analog reading = ");
+    //Serial.println(photocellReading); // the raw analog reading
     // LED gets brighter the darker it is at the sensor
     // that means we have to -invert- the reading from 0-1023 back to 1023-0
      lightSensorValue = photocellReading;
