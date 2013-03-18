@@ -24,3 +24,6 @@ http://www.garduino.co.uk/
 Developer Blog
 http://www.garduino.co.uk/blog
 
+Facebook Page
+https://www.facebook.com/pages/Garduino/465793356766037
+
